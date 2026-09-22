@@ -86,7 +86,14 @@ except ImportError:
         split_statements, wrap)
 
 
-CUR_DIR = os.path.realpath(os.path.dirname(__file__))
+def _package_dir():
+    # PyInstaller onefile extracts to sys._MEIPASS.
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'sqlite_web')
+    return os.path.realpath(os.path.dirname(__file__))
+
+
+CUR_DIR = _package_dir()
 DEBUG = False
 
 BLOB_AS_BASE64 = False  # Default is hex.
