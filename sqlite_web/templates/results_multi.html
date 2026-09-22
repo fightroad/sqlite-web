@@ -7,7 +7,6 @@
 {% endfor %}
 {% if total_statements > results|length %}
   <div class="alert alert-warning">
-    Execution stopped: {{ total_statements - results|length }} remaining
-    statement(s) did not run.
+    执行已停止：剩余 {{ total_statements - results|length }} 条语句未运行。
   </div>
 {% endif %}

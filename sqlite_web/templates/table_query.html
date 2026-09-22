@@ -12,8 +12,8 @@
 
 {% block inner_content %}
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h3 class="mb-0">Query</h3>
-    <a class="small" href="#" id="toggleTableInfo">+/- table definition</a>
+    <h3 class="mb-0">查询</h3>
+    <a class="small" href="#" id="toggleTableInfo">显示/隐藏表结构</a>
   </div>
   <div id="tableInfo">
     {{ table_sql|format_create_table|highlight }}
@@ -33,14 +33,14 @@
         <form action="." autocomplete="off" method="post">
           <input name="sql" type="hidden" value="{{ sql }}" />
       {% endif %}
-      <a class="small float-right" href="{{ url_for('table_query', table=table, sql=sql) }}{% if ordering %}&ordering={{ ordering }}{% endif %}{% if page > 1 %}&page={{ page }}{% endif %}">Permalink</a>
-      <h3>Results ({{ page_start }}&ndash;{{ page_start + result.rows|length - 1 }}{% if total is not none %} of {{ total }}{% endif %})</h3>
+      <a class="small float-right" href="{{ url_for('table_query', table=table, sql=sql) }}{% if ordering %}&ordering={{ ordering }}{% endif %}{% if page > 1 %}&page={{ page }}{% endif %}">固定链接</a>
+      <h3>结果（{{ page_start }}&ndash;{{ page_start + result.rows|length - 1 }}{% if total is not none %} / 共 {{ total }}{% endif %}）</h3>
     {% endif %}
     {% include "results.html" %}
     {% if result.kind == 'rows' and result.rows %}
       {% if show_bulk %}
         <div class="float-right">
-          <button class="btn btn-sm btn-danger bulk-action" disabled name="action" type="submit" value="bulk-delete">Bulk Delete</button>
+          <button class="btn btn-sm btn-danger bulk-action" disabled name="action" type="submit" value="bulk-delete">批量删除</button>
         </div>
         </form>
       {% endif %}

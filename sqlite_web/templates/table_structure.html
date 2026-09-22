@@ -7,20 +7,20 @@
   {{ table_sql|format_create_table|highlight }}
 
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h3 class="mb-0" id="columns">Columns</h3>
+    <h3 class="mb-0" id="columns">列</h3>
     {% if not dataset.is_readonly and not is_view %}
-      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('add_column', table=table) }}">+ Add column</a>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('add_column', table=table) }}">+ 添加列</a>
     {% endif %}
   </div>
   <table class="table table-striped table-sm">
     <thead>
       <tr>
-        <th>Column</th>
-        <th>Data type</th>
+        <th>列</th>
+        <th>数据类型</th>
       {% if not is_view %}
-        <th>Allow null</th>
-        <th>Primary key</th>
-        <th>Actions</th>
+        <th>允许为空</th>
+        <th>主键</th>
+        <th>操作</th>
       {% endif %}
       </tr>
     </thead>
@@ -34,11 +34,11 @@
           <td>{% if column.primary_key %}&check;{% endif %}</td>
           <td>
             {% if dataset.is_readonly %}
-              <strong>read-only</strong>
+              <strong>只读</strong>
             {% else %}
-              <a href="{{ url_for('rename_column', table=table, rename=column.name) }}">Rename</a>
+              <a href="{{ url_for('rename_column', table=table, rename=column.name) }}">重命名</a>
               <span class="separator">|</span>
-              <a class="text-danger" href="{{ url_for('drop_column', table=table, name=column.name) }}">Drop</a>
+              <a class="text-danger" href="{{ url_for('drop_column', table=table, name=column.name) }}">删除</a>
             {% endif %}
           </td>
         {% endif %}
@@ -49,12 +49,12 @@
   <hr />
 
   {% if foreign_keys %}
-    <h3 id="foreign-keys">Foreign Keys</h3>
+    <h3 id="foreign-keys">外键</h3>
     <table class="table table-striped table-sm">
       <thead>
         <tr>
-          <th>Column</th>
-          <th>Destination</th>
+          <th>列</th>
+          <th>目标</th>
         </tr>
       </thead>
       <tbody>
@@ -71,19 +71,19 @@
 
   {% if not is_view %}
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h3 class="mb-0" id="indexes">Indexes</h3>
+    <h3 class="mb-0" id="indexes">索引</h3>
     {% if not dataset.is_readonly %}
-      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('add_index', table=table) }}">+ Add index</a>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('add_index', table=table) }}">+ 添加索引</a>
     {% endif %}
   </div>
   <table class="table table-striped table-sm">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Columns</th>
-        <th>Unique</th>
+        <th>名称</th>
+        <th>列</th>
+        <th>唯一</th>
         <th>SQL</th>
-        <th>Drop?</th>
+        <th>删除</th>
       </tr>
     </thead>
     <tbody>
@@ -104,13 +104,13 @@
           <td>{% if index.unique %}&check;{% endif %}</td>
           <td>
             <a class="view-sql" data-name="{{ index.name }}" href="#">SQL</a>
-            <div style="display:none;">{% if index.sql %}{{ index.sql|format_index|highlight }}{% else %}-- no sql found --{% endif %}</div>
+            <div style="display:none;">{% if index.sql %}{{ index.sql|format_index|highlight }}{% else %}-- 未找到 SQL --{% endif %}</div>
           </td>
           <td>
             {% if dataset.is_readonly %}
-              <strong>read-only</strong>
+              <strong>只读</strong>
             {% else %}
-              <a class="text-danger" href="{{ url_for('drop_index', table=table, name=index.name) }}">Drop</a>
+              <a class="text-danger" href="{{ url_for('drop_index', table=table, name=index.name) }}">删除</a>
             {% endif %}
           </td>
         </tr>
@@ -121,13 +121,13 @@
   {% endif %}
 
   {% if triggers %}
-    <h3 id="triggers">Triggers</h3>
+    <h3 id="triggers">触发器</h3>
     <table class="table table-striped table-sm">
       <thead>
         <tr>
-          <th>Name</th>
+          <th>名称</th>
           <th>SQL</th>
-          <th>Drop?</th>
+          <th>删除</th>
         </tr>
       </thead>
       <tbody>
@@ -140,9 +140,9 @@
             </td>
             <td>
               {% if dataset.is_readonly %}
-                <strong>read-only</strong>
+                <strong>只读</strong>
               {% else %}
-                <a class="text-danger" href="{{ url_for('drop_trigger', table=table, name=trigger.name) }}">Drop</a>
+                <a class="text-danger" href="{{ url_for('drop_trigger', table=table, name=trigger.name) }}">删除</a>
               {% endif %}
             </td>
           </tr>
@@ -155,7 +155,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"></h5>
-          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">关闭</span></button>
         </div>
         <div class="modal-body"></div>
       </div>

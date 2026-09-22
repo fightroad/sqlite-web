@@ -350,8 +350,8 @@ App = window.App || {};
                     (entry.length == 2 || typeof entry[2] === 'string');
             });
             if (!valid) {
-                alert('Import failed. Expected a JSON list of ' +
-                      '[name, sql, table] entries.');
+                alert('导入失败。需要 JSON 列表，每项为 ' +
+                      '[name, sql, table]。');
                 return;
             }
             for (var i = entries.length - 1; i >= 0; i--) {
@@ -369,7 +369,7 @@ App = window.App || {};
         if (!this.bkList.length) {
             this.container.append(
                 $('<span class="dropdown-item-text text-muted small"></span>')
-                    .text('No bookmarks yet'));
+                    .text('暂无书签'));
             this.appendTransfer();
             return;
         }
@@ -412,12 +412,12 @@ App = window.App || {};
         var self = this;
         this.container.append($('<div class="dropdown-divider"></div>'));
         this.container.append(
-            $('<a class="dropdown-item" href="#">Export</a>').on('click', function(e) {
+            $('<a class="dropdown-item" href="#">导出</a>').on('click', function(e) {
                 e.preventDefault();
                 self.exportFile();
             }));
         this.container.append(
-            $('<a class="dropdown-item" href="#">Import</a>').on('click', function(e) {
+            $('<a class="dropdown-item" href="#">导入</a>').on('click', function(e) {
                 e.preventDefault();
                 self.inpFile.trigger('click');
             }));

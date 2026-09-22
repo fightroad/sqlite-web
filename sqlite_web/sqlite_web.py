@@ -389,7 +389,7 @@ def login():
         if request.form.get('password') == app.config['PASSWORD']:
             session['authorized'] = True
             return redirect(session.get('next_url') or url_for('index'))
-        flash('The password you entered is incorrect.', 'danger')
+        flash('您输入的密码不正确。', 'danger')
         app.logger.debug('Received incorrect password attempt from %s' %
                          request.remote_addr)
     return render_template('login.html')
@@ -405,7 +405,7 @@ def select_dataset():
     if dataset and dataset in datasets:
         session['dataset'] = dataset
     else:
-        flash('Unable to load selected database.', 'danger')
+        flash('无法加载所选数据库。', 'danger')
     return redirect(url_for('index'))
 
 @app.route('/load/', methods=['GET', 'POST'])
@@ -413,7 +413,7 @@ def load():
     enable_load = app.config.get('ENABLE_LOAD')
     enable_filesystem = app.config.get('ENABLE_FILESYSTEM')
     if not (enable_load or enable_filesystem):
-        flash('Loading databases at run-time is not supported.', 'warning')
+        flash('不支持在运行时加载数据库。', 'warning')
         return redirect(url_for('index'))
 
     dataset = None
@@ -427,7 +427,7 @@ def load():
             error = str(exc)
 
         if dataset and not error:
-            flash('Successfully loaded database.', 'success')
+            flash('数据库加载成功。', 'success')
             return redirect(url_for('index'))
 
     return render_template(
@@ -439,11 +439,11 @@ def _add_dataset(enable_load, enable_filesystem):
     mode = request.form.get('mode')
     if mode == 'upload':
         if not enable_load:
-            return None, 'Uploading databases is not allowed.'
+            return None, '不允许上传数据库。'
 
         database = request.files.get('database')
         if not database:
-            return None, 'Database file is required.'
+            return None, '必须选择数据库文件。'
 
         if app.config['DB_UPLOAD_DIR']:
             dirname = app.config['DB_UPLOAD_DIR']
@@ -455,19 +455,19 @@ def _add_dataset(enable_load, enable_filesystem):
         database.save(path)
     elif mode == 'filesystem':
         if not enable_filesystem:
-            return None, 'Loading databases from the filesystem is not allowed.'
+            return None, '不允许从文件系统加载数据库。'
         path = request.form.get('filename')
         if not path:
-            return None, 'Filename is required.'
+            return None, '文件名不能为空。'
         if not os.path.exists(path):
-            return None, 'File "%s" not found.' % path
+            return None, '未找到文件 "%s"。' % path
     else:
-        return None, 'Error: unrecognized mode "%s".' % mode
+        return None, '错误：无法识别的模式 "%s"。' % mode
 
     try:
         dataset = initialize_dataset(path)
     except Exception as exc:
-        return None, 'Unable to load database: %s' % exc
+        return None, '无法加载数据库：%s' % exc
     else:
         with datasets_lock:
             datasets[dataset.filename] = dataset
@@ -480,21 +480,21 @@ def unload():
     enable_load = app.config.get('ENABLE_LOAD')
     enable_filesystem = app.config.get('ENABLE_FILESYSTEM')
     if not (enable_load or enable_filesystem):
-        flash('Unloading databases is not supported.', 'danger')
+        flash('不支持卸载数据库。', 'danger')
         return redirect(url_for('index'))
     if len(datasets) == 1:
-        flash('Cannot unload dataset.', 'danger')
+        flash('无法卸载该数据库。', 'danger')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
         dataset = request.form.get('dataset')
         with datasets_lock:
             if not dataset or dataset not in datasets:
-                flash('Database not found.', 'warning')
+                flash('未找到数据库。', 'warning')
                 return redirect(url_for('unload'))
             if len(datasets) == 1:
                 # Concurrent unloads may both pass the pre-check above.
-                flash('Cannot unload the only database.', 'danger')
+                flash('至少需保留一个数据库，无法卸载。', 'danger')
                 return redirect(url_for('index'))
             ds = datasets.pop(dataset)
             remaining = list(datasets)[0]
@@ -503,7 +503,7 @@ def unload():
         current = session.get('dataset')
         if current == dataset:
             session['dataset'] = remaining
-        flash('Database "%s" unloaded successfully.' % dataset, 'success')
+        flash('数据库 "%s" 已成功卸载。' % dataset, 'success')
         return redirect(url_for('index'))
     else:
         dataset = request.args.get('dataset')
@@ -553,19 +553,19 @@ def _query_view(template, table=None):
     if request.method == 'POST' and request.form.get('action') == 'bulk-delete':
         values = _bulk_delete_values(request.form.getlist('pk'))
         if not allow_bulk:
-            flash('Cannot perform bulk operation on this table.', 'warning')
+            flash('无法对此表执行批量操作。', 'warning')
         elif not values:
-            flash('No rows were selected.', 'warning')
+            flash('未选择任何行。', 'warning')
         else:
             try:
                 n = (model_class.delete()
                      .where(model_class._meta.primary_key.in_(values))
                      .execute())
             except Exception as exc:
-                flash('Error performing bulk delete: %s' % exc, 'danger')
+                flash('批量删除出错：%s' % exc, 'danger')
                 app.logger.exception('Error performing bulk delete.')
             else:
-                flash('Successfully deleted %s row(s)' % n, 'success')
+                flash('成功删除 %s 行' % n, 'success')
 
     statements = split_statements(sql) if sql.strip() else []
     single_read = len(statements) == 1 and is_read(dataset, sql)
@@ -574,7 +574,7 @@ def _query_view(template, table=None):
 
     if export_format and statements:
         if not single_read:
-            flash('Only a single query may be exported.', 'warning')
+            flash('只能导出单条查询。', 'warning')
         else:
             qsql = wrap(sql, ordering) if ordering else sql.rstrip('; \t\r\n')
             return export(model_class.raw(qsql).dicts(), export_format, table)
@@ -584,9 +584,9 @@ def _query_view(template, table=None):
     if statements and export_format is None:
         if request.method == 'GET' and not single_read:
             # Writes and scripts only execute via POST.
-            flash('Press Execute to run this statement.', 'info')
+            flash('请先点击「执行」运行此语句。', 'info')
         elif explain and len(statements) > 1:
-            flash('Only a single statement may be explained.', 'warning')
+            flash('只能对单条语句使用“执行计划”。', 'warning')
         elif len(statements) == 1:
             # EXPLAIN QUERY PLAN compiles the statement without running it.
             run_sql = 'EXPLAIN QUERY PLAN %s' % sql if explain else sql
@@ -653,13 +653,13 @@ def table_create():
     dest = '/' + dest.lstrip('/')  # idiot vulnerability "researchers".
     table = (request.form.get('table_name') or '').strip()
     if not table:
-        flash('Table name is required.', 'danger')
+        flash('表名不能为空。', 'danger')
         return redirect(dest)
 
     try:
         get_dataset()[table]
     except Exception as exc:
-        flash('Error: %s' % str(exc), 'danger')
+        flash('错误：%s' % str(exc), 'danger')
         app.logger.exception('Error attempting to create table.')
         return redirect(dest)
     return redirect(url_for('table_import', table=table))
@@ -721,15 +721,15 @@ def add_column(table):
                         name,
                         column_mapping[col_type](null=True)))
             except Exception as exc:
-                flash('Error attempting to add column "%s": %s' % (name, exc),
+                flash('添加列 "%s" 时出错：%s' % (name, exc),
                       'danger')
                 app.logger.exception('Error attempting to add column.')
             else:
-                flash('Column "%s" was added successfully!' % name, 'success')
+                flash('列 "%s" 添加成功！' % name, 'success')
                 dataset.update_cache(table)
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('Name and column type are required.', 'danger')
+            flash('名称和列类型不能为空。', 'danger')
 
     return render_template(
         'add_column.html',
@@ -753,15 +753,15 @@ def drop_column(table):
             try:
                 migrate(dataset._migrator.drop_column(table, name))
             except Exception as exc:
-                flash('Error attempting to drop column "%s": %s' % (name, exc),
+                flash('删除列 "%s" 时出错：%s' % (name, exc),
                       'danger')
                 app.logger.exception('Error attempting to drop column.')
             else:
-                flash('Column "%s" was dropped successfully!' % name, 'success')
+                flash('列 "%s" 删除成功！' % name, 'success')
                 dataset.update_cache(table)
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('Name is required.', 'danger')
+            flash('名称不能为空。', 'danger')
 
     return render_template(
         'drop_column.html',
@@ -787,16 +787,15 @@ def rename_column(table):
             try:
                 migrate(dataset._migrator.rename_column(table, rename, rename_to))
             except Exception as exc:
-                flash('Error attempting to rename column "%s": %s' %
+                flash('重命名列 "%s" 时出错：%s' %
                       (rename, exc), 'danger')
                 app.logger.exception('Error attempting to rename column.')
             else:
-                flash('Column "%s" was renamed successfully!' % rename, 'success')
+                flash('列 "%s" 重命名成功！' % rename, 'success')
                 dataset.update_cache(table)
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('Column name is required and cannot conflict with an '
-                  'existing column\'s name.', 'danger')
+            flash('列名不能为空，且不能与现有列名冲突。', 'danger')
 
     return render_template(
         'rename_column.html',
@@ -825,13 +824,13 @@ def add_index(table):
                         indexed_columns,
                         unique))
             except Exception as exc:
-                flash('Error attempting to create index: %s' % exc, 'danger')
+                flash('创建索引时出错：%s' % exc, 'danger')
                 app.logger.exception('Error attempting to create index.')
             else:
-                flash('Index created successfully.', 'success')
+                flash('索引创建成功。', 'success')
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('One or more columns must be selected.', 'danger')
+            flash('必须选择一列或多列。', 'danger')
 
     return render_template(
         'add_index.html',
@@ -854,13 +853,13 @@ def drop_index(table):
             try:
                 migrate(dataset._migrator.drop_index(table, name))
             except Exception as exc:
-                flash('Error attempting to drop index: %s' % exc, 'danger')
+                flash('删除索引时出错：%s' % exc, 'danger')
                 app.logger.exception('Error attempting to drop index.')
             else:
-                flash('Index "%s" was dropped successfully!' % name, 'success')
+                flash('索引 "%s" 删除成功！' % name, 'success')
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('Index name is required.', 'danger')
+            flash('索引名称不能为空。', 'danger')
 
     return render_template(
         'drop_index.html',
@@ -883,13 +882,13 @@ def drop_trigger(table):
             try:
                 dataset.query('DROP TRIGGER %s;' % quote_ident(name))
             except Exception as exc:
-                flash('Error attempting to drop trigger: %s' % exc, 'danger')
+                flash('删除触发器时出错：%s' % exc, 'danger')
                 app.logger.exception('Error attempting to drop trigger.')
             else:
-                flash('Trigger "%s" was dropped successfully!' % name, 'success')
+                flash('触发器 "%s" 删除成功！' % name, 'success')
                 return redirect(url_for('table_structure', table=table))
         else:
-            flash('Trigger name is required.', 'danger')
+            flash('触发器名称不能为空。', 'danger')
 
     return render_template(
         'drop_trigger.html',
@@ -916,21 +915,21 @@ def table_content(table):
         action = request.form.get('action')
         values = _bulk_delete_values(request.form.getlist('pk'))
         if not allow_bulk:
-            flash('Cannot perform bulk operation on this table.', 'warning')
+            flash('无法对此表执行批量操作。', 'warning')
         elif action != 'bulk-delete':
-            flash('Unrecognized action', 'warning')
+            flash('无法识别的操作', 'warning')
         elif not values:
-            flash('No rows were selected.', 'warning')
+            flash('未选择任何行。', 'warning')
         else:
             try:
                 n = (model.delete()
                      .where(model._meta.primary_key.in_(values))
                      .execute())
             except Exception as exc:
-                flash('Error performing bulk delete: %s' % exc, 'danger')
+                flash('批量删除出错：%s' % exc, 'danger')
                 app.logger.exception('Error performing bulk delete.')
             else:
-                flash('Successfully deleted %s row(s)' % n, 'success')
+                flash('成功删除 %s 行' % n, 'success')
         return redirect(request.full_path)
 
     page_number = request.args.get('page') or ''
@@ -1015,43 +1014,43 @@ def minimal_validate_field(field, value):
         # input, so blank means NULL where '' is unrepresentable.
         value = None
     if value is None and not field.null:
-        return 'NULL', 'Column does not allow NULL values.'
+        return 'NULL', '该列不允许 NULL 值。'
     if value is None:
         return None, None
     if isinstance(field, IntegerField):
         try:
             _ = int(value)
         except Exception:
-            return value, 'Value is not a number.'
+            return value, '值不是数字。'
     elif isinstance(field, FloatField):
         try:
             _ = float(value)
         except Exception:
-            return value, 'Value is not a numeric/real.'
+            return value, '值不是数值/实数。'
     elif isinstance(field, DecimalField):
         try:
             value = str(decimal.Decimal(value))
         except Exception as exc:
-            return value, 'Value is not a Decimal.'
+            return value, '值不是 Decimal。'
     elif isinstance(field, BooleanField):
         if value.lower() not in ('1', '0', 'true', 'false', 't', 'f'):
-            return value, 'Value must be 1, 0, true, false, t or f.'
+            return value, '值必须是 1、0、true、false、t 或 f。'
         value = True if value.lower() in ('1', 't', 'true') else False
     elif isinstance(field, (DateTimeField, DateField, TimeField)):
         if isinstance(field.adapt(value), str):
-            return value, ('Value does not match any supported format: %s.' %
+            return value, ('值不符合任何支持的格式：%s。' %
                            ', '.join(field.formats))
     elif isinstance(field, BlobField):
         if app.config['BLOB_AS_BASE64']:
             try:
                 value = base64.b64decode(value)
             except Exception as exc:
-                return value, 'Value must be base64-encoded binary data.'
+                return value, '值必须是 base64 编码的二进制数据。'
         else:
             try:
                 value = bytes.fromhex(value)
             except Exception as exc:
-                return value, 'Value must be valid hex representation.'
+                return value, '值必须是有效的十六进制表示。'
     try:
         field.db_value(value)
     except Exception as exc:
@@ -1099,23 +1098,23 @@ def table_insert(table):
                 insert[field] = value
 
         if errors:
-            flash('One or more errors prevented the row being inserted.',
+            flash('存在错误，无法插入该行。',
                   'danger')
         elif insert:
             try:
                 with dataset.transaction() as txn:
                     n = model.insert(insert).execute()
             except Exception as exc:
-                flash('Insert failed: %s' % exc, 'danger')
+                flash('插入失败：%s' % exc, 'danger')
                 app.logger.exception('Error attempting to insert row into %s.', table)
             else:
-                flash('Successfully inserted record (%s).' % n, 'success')
+                flash('成功插入记录（%s）。' % n, 'success')
                 return redirect(url_for(
                     'table_content',
                     table=table,
                     page='last'))
         else:
-            flash('No data was specified to be inserted.', 'warning')
+            flash('未指定要插入的数据。', 'warning')
     else:
         edited = set(model._meta.sorted_field_names) - set(defaults)  # Make all fields editable on load.
 
@@ -1164,7 +1163,7 @@ def table_update(table, pk):
     model = dataset[table].model_class
     table_pk = model._meta.primary_key
     if not dataset.cached_has_usable_pk(table):
-        flash('Table must have a usable primary key to perform update.',
+        flash('该表没有可用主键，无法更新。',
               'danger')
         return redirect(url_for('table_content', table=table))
 
@@ -1172,7 +1171,7 @@ def table_update(table, pk):
         expr, data = fetch_row(model, pk)
     except (model.DoesNotExist, ValueError):
         pk_repr = pk_display(table_pk, pk)
-        flash('Could not fetch row with primary-key %s.' % str(pk_repr), 'danger')
+        flash('无法获取主键为 %s 的行。' % str(pk_repr), 'danger')
         return redirect(url_for('table_content', table=table))
 
     columns = []
@@ -1211,20 +1210,20 @@ def table_update(table, pk):
                 update[field] = value
 
         if errors:
-            flash('One or more errors prevented the row being updated.',
+            flash('存在错误，无法更新该行。',
                   'danger')
         elif update:
             try:
                 with dataset.transaction() as txn:
                     n = model.update(update).where(expr).execute()
             except Exception as exc:
-                flash('Update failed: %s' % exc, 'danger')
+                flash('更新失败：%s' % exc, 'danger')
                 app.logger.exception('Error attempting to update row from %s.', table)
             else:
-                flash('Successfully updated %s record.' % n, 'success')
+                flash('成功更新 %s 条记录。' % n, 'success')
                 return redirect_to_previous(table)
         else:
-            flash('No data was specified to be updated.', 'warning')
+            flash('未指定要更新的数据。', 'warning')
 
     columns_fields = zip(columns, fields)
 
@@ -1248,7 +1247,7 @@ def table_delete(table, pk):
     model = dataset[table].model_class
     table_pk = model._meta.primary_key
     if not dataset.cached_has_usable_pk(table):
-        flash('Table must have a usable primary key to perform delete.',
+        flash('该表没有可用主键，无法删除。',
               'danger')
         return redirect(url_for('table_content', table=table))
 
@@ -1256,7 +1255,7 @@ def table_delete(table, pk):
         expr, row = fetch_row(model, pk)
     except (model.DoesNotExist, ValueError):
         pk_repr = pk_display(table_pk, pk)
-        flash('Could not fetch row with primary-key %s.' % str(pk_repr), 'danger')
+        flash('无法获取主键为 %s 的行。' % str(pk_repr), 'danger')
         return redirect(url_for('table_content', table=table))
 
     if request.method == 'POST':
@@ -1264,10 +1263,10 @@ def table_delete(table, pk):
             with dataset.transaction() as txn:
                 n = model.delete().where(expr).execute()
         except Exception as exc:
-            flash('Delete failed: %s' % exc, 'danger')
+            flash('删除失败：%s' % exc, 'danger')
             app.logger.exception('Error attempting to delete row from %s.', table)
         else:
-            flash('Successfully deleted %s record.' % n, 'success')
+            flash('成功删除 %s 条记录。' % n, 'success')
             return redirect_to_previous(table)
 
     return render_template(
@@ -1286,7 +1285,7 @@ def table_row_detail(table, pk):
     model = dataset[table].model_class
     table_pk = model._meta.primary_key
     if not dataset.cached_has_usable_pk(table):
-        flash('Row detail requires a table with a usable primary key.',
+        flash('查看行详情需要表有可用主键。',
               'danger')
         return redirect(url_for('table_content', table=table))
 
@@ -1294,7 +1293,7 @@ def table_row_detail(table, pk):
         expr, row = fetch_row(model, pk)
     except (model.DoesNotExist, ValueError):
         pk_repr = pk_display(table_pk, pk)
-        flash('Could not fetch row with primary-key %s.' % str(pk_repr),
+        flash('无法获取主键为 %s 的行。' % str(pk_repr),
               'danger')
         return redirect(url_for('table_content', table=table))
 
@@ -1363,7 +1362,7 @@ def table_export(table):
         selected = [c for c in (request.form.getlist('columns') or [])
                     if c in col_dict]
         if not selected:
-            flash('Please select one or more columns to export.', 'danger')
+            flash('请选择要导出的一列或多列。', 'danger')
         else:
             model = dataset[table].model_class
             fields = [model._meta.columns[c] for c in selected]
@@ -1371,7 +1370,7 @@ def table_export(table):
             try:
                 return export(query, export_format, table)
             except Exception as exc:
-                flash('Error generating export: %s' % exc, 'danger')
+                flash('生成导出时出错：%s' % exc, 'danger')
                 app.logger.exception('Error generating export.')
 
     return render_template(
@@ -1391,7 +1390,7 @@ def db_download():
         dataset.query('VACUUM INTO ?', (dest,))
     except Exception as exc:
         shutil.rmtree(tmp_dir, ignore_errors=True)
-        flash('Error creating database snapshot: %s' % exc, 'danger')
+        flash('创建数据库快照时出错：%s' % exc, 'danger')
         app.logger.exception('Error creating database snapshot.')
         return redirect(url_for('index'))
 
@@ -1433,9 +1432,9 @@ def table_import(table):
     if request.method == 'POST':
         file_obj = request.files.get('file')
         if not file_obj:
-            flash('Please select an import file.', 'danger')
+            flash('请选择导入文件。', 'danger')
         elif not file_obj.filename.lower().endswith(('.csv', '.json')):
-            flash('Unsupported file-type. Must be a .json or .csv file.',
+            flash('不支持的文件类型。必须是 .json 或 .csv 文件。',
                   'danger')
         else:
             if file_obj.filename.lower().endswith('.json'):
@@ -1469,11 +1468,11 @@ def table_import(table):
                         strict=strict,
                         **kwargs)
             except Exception as exc:
-                flash('Error importing file: %s' % exc, 'danger')
+                flash('导入文件时出错：%s' % exc, 'danger')
                 app.logger.exception('Error importing file.')
             else:
                 flash(
-                    'Successfully imported %s objects from %s.' % (
+                    '成功导入 %s 个对象（来自 %s）。' % (
                         count, file_obj.filename),
                     'success')
                 return redirect(url_for('table_content', table=table))
@@ -1489,7 +1488,7 @@ def table_import(table):
 def drop_table(table):
     dataset = get_dataset()
     is_view = any(v.name == table for v in dataset.get_all_views())
-    label = 'view' if is_view else 'table'
+    label = '视图' if is_view else '表'
     if request.method == 'POST':
         try:
             if is_view:
@@ -1498,12 +1497,12 @@ def drop_table(table):
                 model_class = dataset[table].model_class
                 model_class.drop_table()
         except Exception as exc:
-            flash('Error attempting to drop %s "%s".' % (label, table), 'danger')
+            flash('删除%s "%s" 时出错。' % (label, table), 'danger')
             app.logger.exception('Error attempting to drop %s "%s".', label, table)
         else:
             dataset.update_cache()  # Update all tables.
-            flash('%s "%s" dropped successfully.' %
-                  ('view' if is_view else 'table', table),
+            flash('%s "%s" 删除成功。' %
+                  ('视图' if is_view else '表', table),
                   'success')
             return redirect(url_for('index'))
 
@@ -1590,7 +1589,7 @@ def value_filter(value, max_length=50):
                 return ('<span class="truncated">%s</span> '
                         '<span class="full" style="display:none;">%s</span>'
                         '<a class="toggle-value" href="#" '
-                        'title="Show full value">...</a>') % (
+                        'title="显示完整内容">...</a>') % (
                             escape(value[:max_length]),
                             escape(value))
             return '<span class="full">%s</span>' % escape(value)
@@ -1880,7 +1879,7 @@ def install_auth_handler(password):
     def check_password():
         if not session.get('authorized') and request.path != '/login/' and \
            not request.path.startswith(('/static/', '/favicon')):
-            flash('You must log-in to view the database browser.', 'danger')
+            flash('必须登录后才能查看数据库浏览器。', 'danger')
             session['next_url'] = request.base_url
             return redirect(url_for('login'))
 

@@ -4,32 +4,32 @@
   {% if error %}
     <div class="alert alert-dismissible alert-danger">
       <button class="close" type="button" data-dismiss="alert">×</button>
-      <strong>Error:</strong> {{ error }}
+      <strong>错误：</strong> {{ error }}
     </div>
   {% endif %}
 
   {% if enable_load %}
-    <h3>Upload a Sqlite Database</h3>
+    <h3>上传 SQLite 数据库</h3>
     <form action="." method="post" role="form" enctype="multipart/form-data">
       <div class="form-group">
         <input class="form-control" name="database" type="file" />
-        <small class="form-text text-muted">Open a new database.</small>
+        <small class="form-text text-muted">打开新的数据库。</small>
       </div>
-      <button class="btn btn-primary" name="mode" type="submit" value="upload">Load</button>
-      <a class="btn btn-secondary" href="{{ url_for('index') }}">Cancel</a>
+      <button class="btn btn-primary" name="mode" type="submit" value="upload">加载</button>
+      <a class="btn btn-secondary" href="{{ url_for('index') }}">取消</a>
     </form>
   {% endif %}
 
   {% if enable_filesystem %}
     {% if enable_load %}<hr />{% endif %}
-    <h3>Load a Sqlite Database from File-System</h3>
+    <h3>从文件系统加载 SQLite 数据库</h3>
     <form action="." method="post" role="form">
       <div class="form-group">
         <input class="form-control" name="filename" type="text" value="{% if filename %}{{ filename }}{% endif %}" />
-        <small class="form-text text-muted">Path to database on the server file-system.</small>
+        <small class="form-text text-muted">服务器文件系统上的数据库路径。</small>
       </div>
-      <button class="btn btn-primary" name="mode" type="submit" value="filesystem">Load</button>
-      <a class="btn btn-secondary" href="{{ url_for('index') }}">Cancel</a>
+      <button class="btn btn-primary" name="mode" type="submit" value="filesystem">加载</button>
+      <a class="btn btn-secondary" href="{{ url_for('index') }}">取消</a>
     </form>
   {% endif %}
 {% endblock %}

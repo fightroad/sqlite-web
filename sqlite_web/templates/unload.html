@@ -4,11 +4,11 @@
   {% if error %}
     <div class="alert alert-dismissible alert-danger">
       <button class="close" type="button" data-dismiss="alert">×</button>
-      <strong>Error:</strong> {{ error }}
+      <strong>错误：</strong> {{ error }}
     </div>
   {% endif %}
 
-  <h3>Unload a Database</h3>
+  <h3>卸载数据库</h3>
   <form action="." method="post" role="form">
     <div class="form-group">
       <select class="form-control" name="dataset">
@@ -16,10 +16,9 @@
           <option value="{{ ds.filename }}"{% if selected and selected == ds.filename %} selected="selected"{% endif %}>{{ ds.short_path }}</option>
         {% endfor %}
       </select>
-      <small class="form-text text-muted">Select database to unload.</small>
+      <small class="form-text text-muted">选择要卸载的数据库。</small>
     </div>
-    <button class="btn btn-primary" type="submit">Unload</button>
-    <a class="btn btn-secondary" href="{{ url_for('index') }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">卸载</button>
+    <a class="btn btn-secondary" href="{{ url_for('index') }}">取消</a>
   </form>
 {% endblock %}
-

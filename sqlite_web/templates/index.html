@@ -4,13 +4,13 @@
   <table class="table table-sm table-borderless w-auto mb-2">
     <tbody>
       <tr>
-        <th class="text-muted font-weight-normal pr-4">Filename</th>
+        <th class="text-muted font-weight-normal pr-4">文件名</th>
         <td>{{ dataset.filename }}
-          {% if dataset.is_readonly %}<span class="badge badge-secondary">read-only</span>{% endif %}
+          {% if dataset.is_readonly %}<span class="badge badge-secondary">只读</span>{% endif %}
         </td>
       </tr>
       <tr>
-        <th class="text-muted font-weight-normal pr-4">Size</th>
+        <th class="text-muted font-weight-normal pr-4">大小</th>
         <td>{{ dataset.size_on_disk|filesizeformat }}</td>
       </tr>
       <tr>
@@ -18,29 +18,29 @@
         <td>{{ sqlite.sqlite_version }}</td>
       </tr>
       <tr>
-        <th class="text-muted font-weight-normal pr-4">Created</th>
+        <th class="text-muted font-weight-normal pr-4">创建时间</th>
         <td>{{ dataset.created.strftime('%Y-%m-%d %H:%M') }}</td>
       </tr>
       <tr>
-        <th class="text-muted font-weight-normal pr-4">Modified</th>
+        <th class="text-muted font-weight-normal pr-4">修改时间</th>
         <td>{{ dataset.modified.strftime('%Y-%m-%d %H:%M') }}</td>
       </tr>
       <tr>
-        <th class="text-muted font-weight-normal pr-4">Objects</th>
-        <td>{{ dataset.cached_tables()|length }} tables &middot;
-            {{ dataset.get_all_indexes()|length }} indexes &middot;
-            {{ dataset.get_all_views()|length }} views &middot;
-            {{ dataset.get_all_triggers()|length }} triggers</td>
+        <th class="text-muted font-weight-normal pr-4">对象</th>
+        <td>{{ dataset.cached_tables()|length }} 个表 &middot;
+            {{ dataset.get_all_indexes()|length }} 个索引 &middot;
+            {{ dataset.get_all_views()|length }} 个视图 &middot;
+            {{ dataset.get_all_triggers()|length }} 个触发器</td>
       </tr>
     </tbody>
   </table>
-  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('db_download') }}">Download</a>
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('db_download') }}">下载</a>
   <hr />
-  <h3>Query</h3>
+  <h3>查询</h3>
   <form action="{{ url_for('generic_query') }}" method="post" role="form">
     <div class="form-group">
-      <textarea class="form-control" name="sql" aria-label="SQL query" placeholder="Execute SQL query..." style="height: 120px;"></textarea>
+      <textarea class="form-control" name="sql" aria-label="SQL 查询" placeholder="执行 SQL 查询..." style="height: 120px;"></textarea>
     </div>
-    <button class="btn btn-primary" type="submit">Execute</button>
+    <button class="btn btn-primary" type="submit">执行</button>
   </form>
 {% endblock %}

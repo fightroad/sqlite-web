@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
   <head>
     <title>SQLite Web: {{ dataset.basename }}</title>
     <meta charset="utf-8">
@@ -27,7 +27,7 @@
     {% include "icons.html" %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark primary-nav">
       <a class="navbar-brand" href="{{ url_for('index') }}">sqlite-web {{ version }}</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="切换导航">
         <span class="navbar-toggler-icon"></span>
       </button>
       {% block content_header %}
@@ -43,7 +43,7 @@
                   <a class="dropdown-item{% if dataset and ds.filename == dataset.filename %} active{% endif %}" href="{{ url_for('select_dataset', name=ds.filename) }}" title="{{ ds.filename }}">{{ ds.short_path }}</a>
                 {% endfor %}
                 {% if enable_load or enable_filesystem %}
-                  <a class="dropdown-item" href="{{ url_for('load') }}">Add Database...</a>
+                  <a class="dropdown-item" href="{{ url_for('load') }}">添加数据库...</a>
                 {% endif %}
               </div>
             </li>
@@ -56,23 +56,23 @@
         <span class="navbar-text mr-auto">{% block content_title %}{% endblock %}</span>
         {% if dataset and not dataset.is_readonly %}
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown" id="createTableButton" aria-haspopup="true" aria-expanded="false" type="button">+ Table</button>
+            <button class="btn btn-sm btn-outline-light dropdown-toggle" data-toggle="dropdown" id="createTableButton" aria-haspopup="true" aria-expanded="false" type="button">+ 表</button>
             <div class="dropdown-menu dropdown-menu-right p-2 create-table-menu" aria-labelledby="createTableButton">
               <form action="{{ url_for('table_create') }}" method="post">
                 <input name="redirect" type="hidden" value="{{ request.full_path }}" />{# full-path begins with "/" and includes querystring #}
                 <div class="input-group input-group-sm">
-                  <input class="form-control" name="table_name" placeholder="new_table_name" aria-label="New table name" />
+                  <input class="form-control" name="table_name" placeholder="新表名称" aria-label="新表名称" />
                   <div class="input-group-append">
-                    <button class="btn btn-primary" type="submit">Create</button>
+                    <button class="btn btn-primary" type="submit">创建</button>
                   </div>
                 </div>
               </form>
             </div>
           </div>
         {% endif %}
-        <a class="btn btn-sm btn-secondary ml-1" href="{{ url_for('generic_query') }}">Query</a>
+        <a class="btn btn-sm btn-secondary ml-1" href="{{ url_for('generic_query') }}">查询</a>
         {% if datasets|length() > 1 and (enable_load or enable_filesystem) %}
-          <a class="btn btn-sm btn-danger" href="{{ url_for('unload', dataset=dataset.filename) }}" style="margin-left: 3px;">Unload Database</a>
+          <a class="btn btn-sm btn-danger" href="{{ url_for('unload', dataset=dataset.filename) }}" style="margin-left: 3px;">卸载数据库</a>
         {% endif %}
       </div>
       {% endblock %}
@@ -81,12 +81,12 @@
       <div class="row">
         <div class="col-md-2" id="sidebar">
           {% block sidebar %}{% endblock %}
-          {% block logout %}{% if login_required %}<a href="{{ url_for('logout') }}">Log-out</a>{% endif %}{% endblock %}
+          {% block logout %}{% if login_required %}<a href="{{ url_for('logout') }}">退出登录</a>{% endif %}{% endblock %}
         </div>
         <div class="col-md-10" id="content">
           {% for category, message in get_flashed_messages(with_categories=true) %}
             <div class="alert alert-{{ category }} alert-dismissible">
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
+              <button type="button" class="close" data-dismiss="alert" aria-label="关闭">&times;</button>
               {{ message }}
             </div>
           {% endfor %}
@@ -94,8 +94,8 @@
           <footer>
             <hr />
             <p><small>
-              SQLite database browser <span>v{{ version }}</span>, powered by
-              <a href="http://flask.pocoo.org/">Flask</a> and <a href="http://docs.peewee-orm.com/">Peewee</a>.
+              SQLite 数据库浏览器 <span>v{{ version }}</span>，基于
+              <a href="http://flask.pocoo.org/">Flask</a> 和 <a href="http://docs.peewee-orm.com/">Peewee</a>。
               &copy; {{ now.year }} <a href="https://charlesleifer.com/">Charles Leifer</a>
             </small></p>
           </footer>

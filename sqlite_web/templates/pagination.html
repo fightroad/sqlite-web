@@ -13,7 +13,7 @@
         <button class="page-link" name="page" type="submit" value="{{ page - 1 }}">&lsaquo;</button>
       </li>
       <li class="page-item disabled">
-        <span class="page-link">Page {{ page }}{% if total_pages %} of {{ total_pages }}{% endif %}</span>
+        <span class="page-link">第 {{ page }}{% if total_pages %} / {{ total_pages }}{% endif %} 页</span>
       </li>
       {% set no_next = (page >= total_pages) if total_pages else (not result.has_next) %}
       <li class="{% if no_next %}disabled {% endif %}page-item">
@@ -25,7 +25,7 @@
         </li>
       {% else %}
         <li class="page-item">
-          <button class="page-link" name="count" title="Count total rows" type="submit" value="1">#</button>
+          <button class="page-link" name="count" title="统计总行数" type="submit" value="1">#</button>
         </li>
       {% endif %}
     </ul>
